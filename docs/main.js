@@ -7,7 +7,6 @@ const screenHeight = 600
 const crd2str =(x, y)=>{
 	return x.toString() + ":" + y.toString()
 }
-
 class Level{
 	constructor(width, height, startPoint, template){
 		this.tick = 0
@@ -77,7 +76,9 @@ class Level{
 			const enemy = this.enemies[this.enemyIds[i]]
 			const destinationDelta = Math.sqrt((enemy.path[enemy.destination][0]-enemy.x)*(enemy.path[enemy.destination][0]-enemy.x)+(enemy.path[enemy.destination][1]-enemy.y)*(enemy.path[enemy.destination][1]-enemy.y))
 			if(Math.abs(destinationDelta*this.cellSize.x) < 1){
-
+				if(this.tick >= 100){
+					this.tick = 0
+				}
 				this.enemies[this.enemyIds[i]].lastPoint = enemy.destination
 				this.enemies[this.enemyIds[i]].destination = (enemy.destination+1)%enemy.path.length
 				const delta = {x: enemy.path[this.enemies[this.enemyIds[i]].destination][0]-enemy.path[this.enemies[this.enemyIds[i]].lastPoint][0], y: enemy.path[this.enemies[this.enemyIds[i]].destination][1]-enemy.path[this.enemies[this.enemyIds[i]].lastPoint][1]}
@@ -102,6 +103,7 @@ class Level{
 
 			}
 		}
+		this.tick++
 	}
 	render(){
 		ctx.fillStyle = "white"
@@ -213,21 +215,23 @@ const loop =()=>{
 	levels[1].update()
 	levels[1].render()
 
-
-	if(keys["KeyW"] || keys["ArrowUp"]){
-		player.move(0, -player.speed)
-	}if(keys["KeyS"] || keys["ArrowDown"]){
-		player.move(0, player.speed)
-	}if(keys["KeyA"] || keys["ArrowLeft"]){
-		player.move(-player.speed, 0)
-	}if(keys["KeyD"] || keys["ArrowRight"]){
-		player.move(player.speed, 0)
+	if(!player.isDead){
+		if(keys["KeyW"] || keys["ArrowUp"]){
+			player.move(0, -player.speed)
+		}if(keys["KeyS"] || keys["ArrowDown"]){
+			player.move(0, player.speed)
+		}if(keys["KeyA"] || keys["ArrowLeft"]){
+			player.move(-player.speed, 0)
+		}if(keys["KeyD"] || keys["ArrowRight"]){
+			player.move(player.speed, 0)
+		}
 	}
 }
 loop()
 
 document.addEventListener('keydown', (e)=>{
 	keys[e.code] = true
+	console.log(levels[1].tick, Math.floor(player.x), Math.floor(player.y))
 })
 document.addEventListener('keyup', (e)=>{
 	keys[e.code] = null

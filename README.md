@@ -1,2 +1,2 @@
 # world-hardest-game
-An enviroment for my next genetic algorithm
+An AI beating world hardest game

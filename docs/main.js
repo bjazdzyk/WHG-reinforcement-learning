@@ -154,6 +154,17 @@ class Player{
 		this.y = 0
 		level.newPlayer(this)
 	}
+	moveDir(dir){
+		if(dir == 0){
+			this.move(this.speed, 0)
+		}else if(dir == 1){
+			this.move(0, this.speed)
+		}else if(dir == 2){
+			this.move(-this.speed, 0)
+		}else if(dir == 3){
+			this.move(0, -this.speed)
+		}
+	}
 	move(x, y){
 		if(!this.isDead){
 			if(x<0 && this.x>this.scale/2){
@@ -189,6 +200,17 @@ class Player{
 	}
 }
 
+const str =(data)=>{
+	let S = ""
+	for(i of data){
+		S += i.toString()
+		S += ":"
+	}
+	S = S.slice(0, S.length-1)
+	return(S)
+}
+//console.log(str([1, 5, 2, 6, 87, 4, 87, 4, 876543, "asd"]))
+
 let levels = {}
 levels[1] = new Level(16, 7, {x:1.5, y:3.5}, "empty")
 
@@ -206,6 +228,27 @@ levels[1].addEnemy("dot5", [[4.25, 5.5], [11.75, 5.5]], 50)
 
 const player = new Player("player", levels[1])
 
+const decisions = {}
+const templateDecision = [
+	{//up
+		"good":1,
+		"bad":1
+	},
+	{//down
+		"good":1,
+		"bad":1
+	},
+	{//left
+		"good":1,
+		"bad":1
+	},
+	{//right
+		"good":1,
+		"bad":1
+	}
+]
+let path = ""
+
 
 let keys = {}
 const loop =()=>{
@@ -215,23 +258,48 @@ const loop =()=>{
 	levels[1].update()
 	levels[1].render()
 
-	if(!player.isDead){
-		if(keys["KeyW"] || keys["ArrowUp"]){
-			player.move(0, -player.speed)
-		}if(keys["KeyS"] || keys["ArrowDown"]){
-			player.move(0, player.speed)
-		}if(keys["KeyA"] || keys["ArrowLeft"]){
-			player.move(-player.speed, 0)
-		}if(keys["KeyD"] || keys["ArrowRight"]){
-			player.move(player.speed, 0)
+	const currentState = str([levels[1].tick, Math.floor(player.x), Math.floor(player.y)])
+
+	if(decisions[currentState] == null){
+		decisions[currentState] = templateDecision
+	}
+	let wheel = []
+	let wheelSize = 0
+	for(i of decisions[currentState]){
+		wheelSize += Math.floor(i.good/i.bad*20)
+		wheel.push(wheelSize)
+	}
+
+	let choice = Math.floor(Math.random()*wheelSize)
+	let move
+	for(i in wheel){
+		if(choice<wheel[i]){
+			move = i
+			break
 		}
 	}
+	path += move.toString()
+	player.moveDir(move)
+	
+
+
+
+	// if(!player.isDead){
+	// 	if(keys["KeyW"] || keys["ArrowUp"]){
+	// 		player.move(0, -player.speed)
+	// 	}if(keys["KeyS"] || keys["ArrowDown"]){
+	// 		player.move(0, player.speed)
+	// 	}if(keys["KeyA"] || keys["ArrowLeft"]){
+	// 		player.move(-player.speed, 0)
+	// 	}if(keys["KeyD"] || keys["ArrowRight"]){
+	// 		player.move(player.speed, 0)
+	// 	}
+	// }
 }
 loop()
 
 document.addEventListener('keydown', (e)=>{
 	keys[e.code] = true
-	console.log(levels[1].tick, Math.floor(player.x), Math.floor(player.y))
 })
 document.addEventListener('keyup', (e)=>{
 	keys[e.code] = null

@@ -88,6 +88,10 @@ class Level{
 			}
 			this.enemies[this.enemyIds[i]].x += this.enemies[this.enemyIds[i]].step.x
 			this.enemies[this.enemyIds[i]].y += this.enemies[this.enemyIds[i]].step.y
+			if(this.tick == 0){
+				this.enemies[this.enemyIds[i]].x = enemy.path[0][0]
+				this.enemies[this.enemyIds[i]].y = enemy.path[0][1]
+			}
 		}
 		for(let i=0; i<this.playerIds.length; i++){
 			for(let j=0; j<this.enemyIds.length; j++){
@@ -103,6 +107,7 @@ class Level{
 
 			}
 		}
+
 		this.tick++
 	}
 	render(){
@@ -138,6 +143,11 @@ class Level{
 			}
 
 		}
+	}
+	clear(){
+		this.tick = 0
+		this.players = {}
+		this.playerIds =[]
 	}
 
 }
@@ -226,7 +236,7 @@ levels[1].addEnemy("dot3", [[4.25, 3.5], [11.75, 3.5]], 50)
 levels[1].addEnemy("dot4", [[11.75, 4.5], [4.25, 4.5]], 50)
 levels[1].addEnemy("dot5", [[4.25, 5.5], [11.75, 5.5]], 50)
 
-const player = new Player("player", levels[1])
+let player = new Player("player", levels[1])
 
 const decisions = {}
 const templateDecision = [
@@ -249,9 +259,13 @@ const templateDecision = [
 ]
 let path = ""
 
+let steps = 0
+let steps_limit = 50
+let repeated = 0
 
 let keys = {}
 const loop =()=>{
+	steps ++
 	requestAnimationFrame(loop)
 	ctx.fillStyle = "#70bfe0"
 	ctx.fillRect(0, 0, 800, 600)
@@ -281,7 +295,22 @@ const loop =()=>{
 	path += move.toString()
 	player.moveDir(move)
 	
+	if(steps>=steps_limit || player.isDead){
+		repeated+=1
+		steps = 0
+		levels[1].clear()
+		player = new Player("player", levels[1])
+		if(repeated >= 5){
+			repeated = 0
+			steps_limit+=20
+		}
+	}
 
+
+	// if(keys["Space"]){
+	// 	levels[1].clear()
+	// 	player = new Player("player", levels[1])
+	// }
 
 
 	// if(!player.isDead){
